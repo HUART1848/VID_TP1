@@ -10,6 +10,7 @@ geometry: margin=1.5cm
 header-includes:
   - \usepackage{fancyhdr}
   - \pagestyle{fancy}
+  - \setlength{\headheight}{32pt}
   - \fancyhead[LE,LO]{Hugo Huart - VID - Travail Pratique 1}
 ---
 
@@ -17,3 +18,34 @@ header-includes:
 # Exercice 1
 
 ## 1 - a)
+Chargement des données dans la variable `examen`.
+
+```{r}
+examen <- read.table("data/examen.txt", header=T)
+```
+
+## 1 - b)
+Création des boîtes à moustaches de couleur orange correspondant aux valeurs des
+notes d'examen de chaque groupe (A et B), avec un rappel des valeurs uniques des groupe sur chaque coté, ainsi qu'une ligne horizontale indiquant la note de
+réussite (4).
+
+```{r}
+par(pty="s")
+boxplot(note~groupe, data=examen, main="examen", col="orange")
+abline(h=4, lty=2)
+rug(examen[examen$groupe == "A",]$note, side=2)
+rug(examen[examen$groupe == "B",]$note, side=4)
+```
+
+## 1 - c)
+Les deux groupes ont une étendue similaire. Le groupe A possède cependant
+une distribution plus étalée à gauche.
+
+## 1 - d)
+Calcul des écarts-types:
+
+```{r}
+sd(examen[examen$groupe == "A",]$note)
+sd(examen[examen$groupe == "B",]$note)
+```
+
