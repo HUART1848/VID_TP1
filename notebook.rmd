@@ -100,8 +100,37 @@ View(Titanic)
 
 ## 2 - b)
 
+Affichage du diagramme en barres multiple:
+
 ```{r}
-titanic.bar<-barchart(Class~Survived|Sex+Age, data=as.data.frame(Titanic),
+titanic.bar<-barchart(Class~Freq|Sex+Age, data=as.data.frame(Titanic),
                       groups=Survived, stack=TRUE, layout=c(4,1),
                       auto.key=list(title="Survived", columns=2))
+print(titanic.bar)
 ```
+
+Avec le paramètre `stack` passé à `TRUE`, les barres `NO` et `YES` sont
+superposés horizontalement l'une sur l'autre. Avec cet argument à `FALSE`, les
+barres seraient situées côte à côte.
+
+## 2 - c)
+
+On constate les différences suivantes:
+
+* La proportion de femmes survivantes dans leur groupe est bien plus grande
+que celle des hommes.
+
+* Il y avait beaucoup moins d'enfants que d'adultes sur le bateau. Les enfants
+on un peu mieux survécu que les adultes. Par exemple, aucun enfant
+de 1ère classe n'est mort.
+Comme chez les adultes, les filles ont plutôt mieux survécus que les garçons.
+
+* En général, les passagers des classes supérieures ont mieux survécus.
+La grande majorité des membres d'équipages étaient des hommes, et ceux-ci
+n'ont pas survécus pour la plupart.
+
+## 2 - d)
+
+Il est assez difficile de lire et interpréter les proportions des catégories
+les plus petites en taille. Un  diagramme en barres standard pour chaque
+catégorie, avec une échelle adaptée à leur taille serait plus judicieux.
