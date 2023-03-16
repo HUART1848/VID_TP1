@@ -15,16 +15,28 @@ header-includes:
 ---
 
 \pagebreak
+# Chargement des librairies
+
+```{r}
+library("e1071")
+library("lattice")
+```
+
+\pagebreak
 # Exercice 1
 
 ## 1 - a)
+
 Chargement des données dans la variable `examen`.
 
 ```{r}
 examen <- read.table("data/examen.txt", header=T)
+examen.a = split(examen$note, examen$groupe)$A
+examen.b = split(examen$note, examen$groupe)$B
 ```
 
 ## 1 - b)
+
 Création des boîtes à moustaches de couleur orange correspondant aux valeurs des
 notes d'examen de chaque groupe (A et B), avec un rappel des valeurs uniques des groupe sur chaque coté, ainsi qu'une ligne horizontale indiquant la note de
 réussite (4).
@@ -33,19 +45,63 @@ réussite (4).
 par(pty="s")
 boxplot(note~groupe, data=examen, main="examen", col="orange")
 abline(h=4, lty=2)
-rug(examen[examen$groupe == "A",]$note, side=2)
-rug(examen[examen$groupe == "B",]$note, side=4)
+rug(examen.a, side=2)
+rug(examen.b, side=4)
 ```
 
 ## 1 - c)
-Les deux groupes ont une étendue similaire. Le groupe A possède cependant
-une distribution plus étalée à gauche.
 
+Les deux groupes ont une étendue similaire. Le groupe A possède cependant
+une distribution plus étalée à gauche, ainsi que des deuxième et troisième
+quartiles sensiblement plus grand que ceux du groupe B.
+
+\pagebreak
 ## 1 - d)
+
 Calcul des écarts-types:
 
 ```{r}
-sd(examen[examen$groupe == "A",]$note)
-sd(examen[examen$groupe == "B",]$note)
+sd(examen.a)
+sd(examen.b)
 ```
 
+## 1 - e)
+
+On constate que le groupe A possède une dispersion plus grand que le groupe B.
+
+## 1 - f)
+
+Calcul du résumé de la distribution des notes du groupe A:
+
+```{r}
+summary(examen.a)
+```
+
+## 1 - g)
+
+
+Calcul de l'asymétrie de la distribution des notes du groupe A:
+
+```{r}
+skewness(examen.a)
+```
+
+\pagebreak
+# Exercice 2
+
+## 2 - a)
+
+Chargement des données à propos du Titanic:
+
+```{r}
+data(Titanic)
+View(Titanic)
+```
+
+## 2 - b)
+
+```{r}
+titanic.bar<-barchart(Class~Survived|Sex+Age, data=as.data.frame(Titanic),
+                      groups=Survived, stack=TRUE, layout=c(4,1),
+                      auto.key=list(title="Survived", columns=2))
+```
