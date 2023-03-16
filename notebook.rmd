@@ -20,6 +20,7 @@ header-includes:
 ```{r}
 library("e1071")
 library("lattice")
+library("HSAUR2")
 ```
 
 \pagebreak
@@ -134,3 +135,35 @@ n'ont pas survécus pour la plupart.
 Il est assez difficile de lire et interpréter les proportions des catégories
 les plus petites en taille. Un  diagramme en barres standard pour chaque
 catégorie, avec une échelle adaptée à leur taille serait plus judicieux.
+
+# Exercice 3
+
+Estimation des coefficients de corrélation des graphiques:
+
+```
+I:   environ  0.9
+II:  environ  0
+III: environ  0
+IV:  environ -0.9
+```
+
+# Exercice 4
+
+Chargement des données `plasma`:
+
+```{r}
+data(plasma)
+```
+
+## 4 - a)
+
+Affichage du nuage du points:
+
+```{r}
+par(pty="s")
+plot(plasma$fibrinogen, y=plasma$globulin, pch=20,
+     xlab="fibrinogène", ylab="globuline")
+```
+
+
+
