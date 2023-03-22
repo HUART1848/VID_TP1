@@ -6,21 +6,36 @@ fontsize: 12pt
 output: pdf_document
 toc: yes
 toc-title: "Table des matières"
-geometry: margin=1.5cm
 header-includes:
   - \usepackage{fancyhdr}
   - \pagestyle{fancy}
   - \setlength{\headheight}{32pt}
   - \fancyhead[LE,LO]{Hugo Huart - VID - Travail Pratique 1}
+  - \usepackage{geometry}
+  - \geometry{top=2cm,left=2cm,bottom=2cm,right=2cm}
 ---
 
 \pagebreak
+# Introduction
+
+Le but de ce travail pratique est d'effectuer un rappel et une consolidation 
+des connaissances du logiciel **R**, déjà vu lors du cours de PST.
+
+Des librairies de données ainsi que la fameuse libraire graphique `ggplot2`
+seront utilisées tout au long de ce travail pratique.
+
 # Chargement des librairies
 
-```{r}
+```{r warning=FALSE, message=FALSE}
+library("corrplot")
+library("corrr")
 library("e1071")
-library("lattice")
+library("geomtextpath")
+library("GGally")
+library("ggplot2")
 library("HSAUR2")
+library("lattice")
+library("palmerpenguins")
 ```
 
 \pagebreak
@@ -28,7 +43,7 @@ library("HSAUR2")
 
 ## 1 - a)
 
-Chargement des données dans la variable `examen`.
+Chargement des données dans la variable `examen`:
 
 ```{r}
 examen <- read.table("data/examen.txt", header=T)
@@ -42,13 +57,15 @@ Création des boîtes à moustaches de couleur orange correspondant aux valeurs 
 notes d'examen de chaque groupe (A et B), avec un rappel des valeurs uniques des groupe sur chaque coté, ainsi qu'une ligne horizontale indiquant la note de
 réussite (4).
 
-```{r}
+```{r, fig.align='center', fig.width=4, fig.height=4}
 par(pty="s")
 boxplot(note~groupe, data=examen, main="examen", col="orange")
 abline(h=4, lty=2)
 rug(examen.a, side=2)
 rug(examen.b, side=4)
 ```
+
+On constate que le groupe B a été globalement meilleur que le groupe A.
 
 ## 1 - c)
 
@@ -66,6 +83,9 @@ sd(examen.a)
 sd(examen.b)
 ```
 
+L'écart-type supérieur du groupe A permet de constater une dispersion
+plus grande que celle du groupe B.
+
 ## 1 - e)
 
 On constate que le groupe A possède une dispersion plus grand que le groupe B.
@@ -79,7 +99,6 @@ summary(examen.a)
 ```
 
 ## 1 - g)
-
 
 Calcul de l'asymétrie de la distribution des notes du groupe A:
 
@@ -103,14 +122,14 @@ View(Titanic)
 
 Affichage du diagramme en barres multiple:
 
-```{r}
+```{r, fig.align='center', fig.height=6}
 titanic.bar<-barchart(Class~Freq|Sex+Age, data=as.data.frame(Titanic),
                       groups=Survived, stack=TRUE, layout=c(4,1),
                       auto.key=list(title="Survived", columns=2))
 print(titanic.bar)
 ```
 
-Avec le paramètre `stack` passé à `TRUE`, les barres `NO` et `YES` sont
+Avec le paramètre `stack` passé à `TRUE`, les barres `No` et `Yes` sont
 superposés horizontalement l'une sur l'autre. Avec cet argument à `FALSE`, les
 barres seraient situées côte à côte.
 
@@ -141,12 +160,13 @@ catégorie, avec une échelle adaptée à leur taille serait plus judicieux.
 Estimation des coefficients de corrélation des graphiques:
 
 ```
-I:   environ  0.9
-II:  environ  0
-III: environ  0
-IV:  environ -0.9
+I:   environ  0.8, tendance linéaire positive
+II:  environ  0  , pas de tendance apparente
+III: environ  0  , parabole, pas de tendance linéaire apparente
+IV:  environ -0.8, tendance linéaire négative
 ```
 
+\pagebreak
 # Exercice 4
 
 Chargement des données `plasma`:
@@ -159,11 +179,297 @@ data(plasma)
 
 Affichage du nuage du points:
 
-```{r}
+```{r, fig.align='center', fig.width=6, fig.height=6}
 par(pty="s")
 plot(plasma$fibrinogen, y=plasma$globulin, pch=20,
      xlab="fibrinogène", ylab="globuline")
 ```
 
+## 4 - b)
 
+Il n'y a pas vraiment de corrélation linéaire forte entre les deux variables.
+On constate cependant que la très grande majorité des valeurs se situe en dessous
+d'un niveau de fibrinogène de 3.5.
 
+\pagebreak
+## 4 - c)
+
+Affichage du graphique de la probabilité de dépassement pour la valeur
+de sédimentation d'ECR de référence:
+
+```{r, fig.align='center', fig.width=7, fig.height=7}
+plasma.glm<-glm(ESR~fibrinogen+globulin, data=plasma, family=binomial)
+prob<-predict(plasma.glm, type="response")
+par(pty="s")
+plot(globulin~fibrinogen, data=plasma, xlim=c(2,6), ylim=c(25,55), pch=20,
+xlab="fibrinogène", ylab="globuline", main="")
+symbols(plasma$fibrinogen, plasma$globulin, circles=prob, add=TRUE, fg="red",
+bg="orange")
+```
+
+On constate que plus les valeurs de fibrinogène et de globuline sont hautes,
+plus la probabilité de dépasser la valeur de référence est élevée.
+
+# Exercice 5
+
+## 5 - a)
+
+Affichage de l'aide pour l'objet `ascombe` avec la commande suivante:
+
+```{r}
+help(anscombe)
+```
+
+Voici la description obtenue:
+
+_Four $x$-$y$ datasets which have the same traditional statistical properties_
+_(mean, variance, correlation, regression line, etc.), yet are quite different._
+
+Il s'agit des 4 paires de valeurs faisant partie du quartet d'Anscombe.
+
+## 5 - b)
+
+Calcul des coefficients de corrélation pour chacune des 4 paires de valeurs:
+
+```{r}
+cor(anscombe$x1, anscombe$y1)
+cor(anscombe$x2, anscombe$y2)
+cor(anscombe$x3, anscombe$y3)
+cor(anscombe$x4, anscombe$y4)
+```
+
+On constate que les 4 jeux de données ont un coefficient de corrélation
+très similaire, à 3 décimales près.
+
+## 5 - c)
+
+Création de la table de données `anscombe1`:
+
+```{r}
+anscombe.1<-data.frame(x1=anscombe$x1, x4=anscombe$x4, y1=anscombe$y1,
+y2=anscombe$y2, y3=anscombe$y3, y4=anscombe$y4)
+```
+
+\pagebreak
+## 5 - d)
+
+Affichage du tableau des corrélations, à l'aide de la librairie `corrplot`:
+
+```{r, fig.align='center', fig.width=6, fig.height=6}
+corrplot.mixed(cor(anscombe.1), order="hclust", tl.col="black")
+```
+
+Le tableau permet de visualiser les coefficients de corrélation
+entre les variables. La couleur bleue indique une corrélation positive, le rouge
+une corrélation négative. La taille des cercles de la partie supérieure
+du tableau est proportionnelle à la valeur du coefficient.
+
+On retrouve également les valeurs
+d'environ `0.82` entre les paires correspondantes.
+
+\pagebreak
+## 5 - e)
+
+Affichage du graphe des corrélations, en utilisant une matrice de corrélation
+issue de l'objet `anscombe1`.
+
+```{r, fig.align='center', fig.width=6, fig.height=6}
+anscombe.1.corr<-correlate(anscombe.1)
+network_plot(anscombe.1.corr)
+```
+
+Le graphique permet de visualiser les différents coefficients de corrélation
+entre les variables. On retrouve le fait que les paires correspondantes 
+(p.ex `x1` et `y1`) ont le meilleur coefficient de corrélation.
+
+\pagebreak
+## 5 - f)
+
+Affichage du graphique de corrélations et nuages de points:
+
+```{r, fig.align='center', fig.width=7, fig.height=7}
+ggpairs(anscombe.1, title = "Séries de F. Anscombe",
+        lower=list(continuous=wrap("points", colour="cyan4")))
+```
+
+Le graphique présente un nuage de points dans sa partie inférieure, 
+la distribution de chaque variable dans sa diagonale ainsi que le coefficient
+de corrélation entre chaque variable dans sa partie supérieure.
+
+On constate des distributions très diverses entres les différentes variables.
+
+Le graphique est assez lisible, hormis la valeur de l'axe horizontal de la 
+dernière case de la deuxième colonne. Cet axe pourrait donc être corrigée.
+
+La mention "Corr" est également peut-être superflue dans chaque case. Une seule 
+légende extérieure mentionnant que ces cases correspondent à la valeur
+de corrélation serait suffisante.
+
+## 5 - g)
+
+Affichage de la matrice de nuages de points:
+
+```{r, fig.align='center', fig.width=7,  fig.height=7}
+par(mfrow=c(2, 2), pty="s", pch=21)
+anscombe.scatter <- function(x, y) {
+  plot(x, y, xlab="", ylab="",
+       col="black", bg="orange", xlim=c(5,20), ylim=c(4,14))
+}
+anscombe.scatter(anscombe$x1, anscombe$y1)
+anscombe.scatter(anscombe$x2, anscombe$y2)
+anscombe.scatter(anscombe$x3, anscombe$y3)
+anscombe.scatter(anscombe$x4, anscombe$y4)
+```
+
+On constate que les 4 paires de valeurs n'ont pas du tout la même représentation
+graphique, malgré leur fortes similarités statistiques.
+
+## 5 - h)
+
+Voir les commentaires des sous-exercices précédents.
+
+# Exercice 6
+
+## 6 - a)
+
+Une fois la librairie `palmerpenguins` chargée, les données se trouvent dans
+l'objet `penguins`.
+
+Détermination de la variable possédant le plus de valeurs manquantes:
+
+```{r}
+colSums(is.na(penguins))
+```
+
+On constate que la variable `sex` possède le plus de valeurs manquantes (11).
+
+## 6 - b)
+
+Affichage du nombre du nombre de manchots par espèce:
+
+```{r}
+table(penguins$species)
+```
+
+On constate que les manchots Adélie sont les plus représentés.
+
+\pagebreak
+## 6 - c)
+
+Affichage du nuage de points de la masse corporelle versus la longueur des 
+nageoires:
+
+```{r, fig.align='center', fig.width=8, fig.height=6, warning=FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+geom_point(aes(color = species, shape = species), size = 3, alpha = 0.8) +
+scale_color_manual(values = c("darkorange","purple","cyan4")) +
+labs(title = "Taille des manchots, Palmer Station LTER",
+subtitle = "Longueur des nageoires et masse corporelle chez les manchots
+Adelie, Chinstrap et de Gentoo",
+x = "Longueur des nageoire (mm)",
+y = "Masse corporelle (g)",
+color = "Espèce de manchots",
+shape = "Espèce de manchots") +
+theme_bw()
+```
+
+## 6 - d)
+
+Oui, on constate une corrélation linéaire positive.
+
+## 6 - e)
+
+Il ne semble pas y avoir de valeurs aberrantes évidentes. Cependant, on constate 
+que certains groupes de valeurs sont alignées verticalement ou horizontalement.
+Ceci est probablement dû à la précision approximative de certaine mesures (on 
+comprend que les manchots peuvent être agités). Cela implique que des valeurs
+réelles ont été arrondies par la mesure à des chiffres voisins et plus ronds.
+
+## 6 - f)
+
+Une valeur de 205mm semble adéquate, il n'y a qu'un seul manchot de Gentoo en 
+dessous de cette valeur.
+
+## 6 - g)
+
+Détermination du coefficient de corrélation:
+
+```{r}
+cor(penguins$flipper_length_mm, penguins$bill_length_mm, use="complete.obs")
+```
+
+Cela confirme le coefficient de corrélation positif apparent.
+
+\pagebreak
+## 6 - h)
+
+Affichage de la version modifiée du graphique du point **6 - c)**:
+
+```{r, fig.align='center', fig.width=8, fig.height=6, warning=FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+geom_point(aes(color = species, shape = island), size = 3, alpha = 0.8) +
+scale_color_manual(values = c("darkorange","purple","cyan4")) +
+labs(title = "Taille des manchots, Palmer Station LTER",
+subtitle = "Longueur des nageoires et masse corporelle chez les manchots
+Adelie, Chinstrap et de Gentoo",
+x = "Longueur des nageoire (mm)",
+y = "Masse corporelle (g)",
+color = "Espèce de manchots",
+shape = "Îles") +
+theme_bw()
+```
+
+## 6 - i)
+
+Les manchots de Gentoo se trouvent sur l'île Biscoe.
+
+## 6 - j)
+
+Affichage du nuage de points de la masse corporelle versus
+la longueur des nageoires selon le sexe.
+
+```{r fig.align='center', fig.width=8, fig.height=6, warning=FALSE, echo=FALSE}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+geom_point(aes(color = sex), size = 3, alpha = 0.8) +
+scale_color_manual(values = c("darkorange","purple","grey")) +
+facet_wrap(~species) + 
+labs(title = "Taille des manchots, Palmer Station LTER",
+subtitle = "Longueur des nageoires et masse corporelle chez les manchots
+Adelie, Chinstrap et de Gentoo",
+x = "Longueur des nageoire (mm)",
+y = "Masse corporelle (g)",
+color = "Espèce de manchots",
+shape = "Îles") +
+theme_bw()
+```
+
+## 6 - k)
+
+On constate une différence de masse corporelle entre les deux sexes.
+Chez chaque espèce, les mâles sont majoritairement plus lourds que les femelles.
+
+\pagebreak
+# Exercice 7
+
+Affichage d'un graphique en 2 dimensions avec contours à l'aide de l'extension 
+`geomtexpath` pour `ggplot2`:
+
+```{r}
+df <- expand.grid(x = seq(nrow(volcano)), y = seq(ncol(volcano)))
+df$z <- as.vector(volcano)
+
+ggplot(df, aes(x, y, z = z)) + 
+  geom_contour_filled(bins = 6, alpha = 0.6) + 
+  geom_textcontour(bins = 6, size = 2.5, straight = TRUE) + 
+  scale_fill_manual(values = terrain.colors(11)) + 
+  theme(legend.position = "none")
+```
+
+# Conclusion
+
+Ce travail pratique a permis d'appréhender la librairie graphique `ggplot2` et 
+de consolider les connaissances du logiciel **R** déjà abordées durant le cours
+de PST.
+
+Le logiciel **R** est outil de travail très flexible, efficace et puissant, ce 
+qui le rend très utile pour effectuer des tâches liées à la science des données.
